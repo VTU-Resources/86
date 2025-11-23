@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Shree Saree App</title>
     
     <!-- Tailwind CSS -->
@@ -18,11 +18,16 @@
         body {
             font-family: 'Outfit', sans-serif;
             -webkit-tap-highlight-color: transparent;
+            /* Fix for mobile browser height issues */
+            height: 100vh;
+            height: 100dvh; 
         }
         
+        /* Hide Scrollbar but keep functionality */
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
+        /* Animations */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -41,7 +46,10 @@
         }
         .animate-backdrop { animation: backdropFade 0.2s ease-out forwards; }
 
+        /* Safe Area Insets for iPhones with notches */
+        .pt-safe { padding-top: env(safe-area-inset-top); }
         .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+        .mb-safe { margin-bottom: env(safe-area-inset-bottom); }
     </style>
     
     <script>
@@ -62,10 +70,10 @@
         }
     </script>
 </head>
-<body class="bg-gray-50 text-gray-800 h-screen overflow-hidden flex justify-center">
+<body class="bg-gray-100 text-gray-800 h-screen w-screen overflow-hidden flex justify-center items-start">
 
-    <!-- App Container -->
-    <div id="app" class="w-full max-w-md h-full bg-white shadow-2xl relative flex flex-col border-x border-gray-200">
+    <!-- App Container: w-full on mobile, max-w-md on desktop -->
+    <div id="app" class="w-full h-full md:h-[95vh] md:my-auto md:max-w-md md:rounded-3xl bg-white shadow-2xl relative flex flex-col md:border border-gray-200 overflow-hidden">
         <!-- Content injected by JS -->
     </div>
 
@@ -106,7 +114,7 @@
             selectedCategory: 'All',
             viewProduct: null,
             showLoginModal: false,
-            pendingTab: null, // To redirect after login
+            pendingTab: null,
             user: {
                 name: "",
                 phone: "",
@@ -166,16 +174,14 @@
                  return;
             }
 
-            // Save Login
             state.user.name = nameInput;
             state.user.phone = phoneInput;
             state.showLoginModal = false;
             
-            // Redirect to pending tab or default to profile to finish details
             const nextTab = state.pendingTab || 'profile';
             state.pendingTab = null;
             
-            saveState(); // Persist to local storage
+            saveState();
             setActiveTab(nextTab);
         }
 
@@ -282,7 +288,6 @@
         // --- RENDER FUNCTIONS ---
         
         function renderHeader() {
-            // Profile Icon Click triggers checkLogin('profile')
             const userPhoto = state.user.photo 
                 ? `<img src="${state.user.photo}" class="w-9 h-9 rounded-full object-cover border-2 border-rose-100">`
                 : `<div class="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-500"><i class="ph-bold ph-user text-xl"></i></div>`;
@@ -292,7 +297,7 @@
                 : `<div class="w-8 h-8 rounded-full bg-rose-600 flex items-center justify-center text-white font-bold text-xs">SS</div>`;
 
             return `
-                <div class="sticky top-0 z-40 bg-white shadow-sm px-4 py-3 flex items-center justify-between">
+                <div class="sticky top-0 z-40 bg-white shadow-sm px-4 py-3 pt-safe flex items-center justify-between">
                     <div class="flex items-center gap-2">
                         ${backButton}
                         <h1 class="text-xl font-bold text-gray-900 tracking-tight">Shree <span class="text-rose-600">Saree</span></h1>
@@ -408,8 +413,6 @@
         }
 
         function renderCart() {
-            // NOTE: This view is only reachable if isLoggedIn() is true
-            
             if (state.cart.length === 0) {
                 return `
                     <div class="p-4 pb-24 h-full flex flex-col items-center justify-center text-center">
@@ -445,7 +448,6 @@
             `).join('');
 
             const total = state.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-            // Since we force login, user name and phone should be there. Address might be empty.
             const hasAddress = state.user.address && state.user.address.trim().length > 0;
 
             return `
@@ -473,8 +475,6 @@
         }
 
         function renderProfile() {
-            // NOTE: This view is only reachable if isLoggedIn() is true
-            
             const photoSrc = state.user.photo || '';
             const photoHtml = state.user.photo 
                 ? `<img src="${state.user.photo}" class="w-full h-full object-cover">`
@@ -548,7 +548,6 @@
                     badge = `<span class="absolute -top-1 -right-2 bg-rose-600 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center animate-bounce">${cartCount}</span>`;
                 }
 
-                // IMPORTANT: Logic to gate 'cart' and 'profile' access
                 let onclickAction = `setActiveTab('${tab.id}')`;
                 if (tab.id === 'cart' || tab.id === 'profile') {
                     onclickAction = `checkLogin('${tab.id}')`;
@@ -579,10 +578,10 @@
             const p = state.viewProduct;
             
             return `
-                <div class="fixed inset-0 z-50 bg-white flex flex-col overflow-y-auto animate-slide-up w-full max-w-md mx-auto">
-                    <div class="relative h-[50vh] shrink-0">
+                <div class="fixed inset-0 z-50 bg-white flex flex-col overflow-y-auto animate-slide-up w-full h-full pb-safe">
+                    <div class="relative h-[45vh] shrink-0">
                         <img src="${p.image}" class="w-full h-full object-cover">
-                        <button onclick="closeProduct()" class="absolute top-4 left-4 p-2 bg-white/80 rounded-full shadow-lg">
+                        <button onclick="closeProduct()" class="absolute top-4 left-4 p-2 bg-white/80 rounded-full shadow-lg pt-safe mt-2">
                             <i class="ph-bold ph-arrow-left text-xl"></i>
                         </button>
                     </div>
@@ -616,9 +615,8 @@
                             This exquisite saree represents the finest craftsmanship. Perfect for weddings, festivals, and special occasions. Handpicked for the Shree Saree collection.
                         </p>
 
-                        <div class="mt-auto pt-4 bg-white border-t border-gray-100 flex gap-4 sticky bottom-0">
+                        <div class="mt-auto pt-4 pb-safe bg-white border-t border-gray-100 flex gap-4 sticky bottom-0">
                             <button onclick="addToCart(${p.id}); closeProduct()" class="flex-1 py-3 border border-gray-900 text-gray-900 font-bold rounded-xl">Add to Cart</button>
-                            <!-- Buy Now checks login before moving to cart -->
                             <button onclick="addToCart(${p.id}); closeProduct(); checkLogin('cart')" class="flex-1 py-3 bg-rose-600 text-white font-bold rounded-xl shadow-lg shadow-rose-200">Buy Now</button>
                         </div>
                     </div>
@@ -630,8 +628,8 @@
             if (!state.showLoginModal) return '';
 
             return `
-                <div class="fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-backdrop w-full max-w-md mx-auto">
-                    <div class="bg-white rounded-2xl w-full p-6 shadow-2xl transform scale-100 animate-fade-in">
+                <div class="fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-backdrop w-full h-full">
+                    <div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl transform scale-100 animate-fade-in mx-auto">
                         <div class="text-center mb-6">
                             <div class="w-12 h-12 bg-rose-50 rounded-full flex items-center justify-center text-rose-600 font-bold mx-auto mb-3 text-xl">
                                 SS
@@ -674,34 +672,28 @@
             const app = document.getElementById('app');
             let content = '';
 
-            // Header
             content += renderHeader();
 
-            // Main Content Area
-            content += `<main class="flex-1 overflow-hidden relative">`;
+            content += `<main class="flex-1 overflow-hidden relative w-full">`;
             if (state.activeTab === 'home') content += renderHome();
             else if (state.activeTab === 'search') content += renderSearch();
             else if (state.activeTab === 'cart') content += renderCart();
             else if (state.activeTab === 'profile') content += renderProfile();
             content += `</main>`;
 
-            // Nav Bar
             content += renderNavBar();
 
-            // Modals
             content += renderProductModal();
             content += renderLoginModal();
 
             app.innerHTML = content;
         }
 
-        // --- HELPER TO OPEN PRODUCT FROM ID ---
         function openProductById(id) {
             const p = PRODUCTS.find(x => x.id === id);
             if(p) openProduct(p);
         }
 
-        // --- INITIALIZE ---
         loadState();
 
     </script>
