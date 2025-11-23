@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Shree Saree App</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+        .animate-slide-up { animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+        @keyframes backdropFade {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .animate-backdrop { animation: backdropFade 0.2s ease-out forwards; }
+
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+    </style>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        rose: {
+                            50: '#fff1f2',
+                            100: '#ffe4e6',
+                            500: '#f43f5e',
+                            600: '#e11d48',
+                            800: '#9f1239',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 text-gray-800 h-screen overflow-hidden flex justify-center">
+
+    <!-- App Container -->
+    <div id="app" class="w-full max-w-md h-full bg-white shadow-2xl relative flex flex-col border-x border-gray-200">
+        <!-- Content injected by JS -->
+    </div>
+
+    <!-- MAIN JAVASCRIPT LOGIC -->
+    <script>
+        // --- DATA ---
+        const PRODUCTS = [
+            { id: 1, name: "Royal Banarasi Silk Red", price: 4500, originalPrice: 6000, category: "Banarasi", rating: 4.8, image: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?q=80&w=600&auto=format&fit=crop" },
+            { id: 2, name: "Kanjivaram Gold Tissue", price: 8200, originalPrice: 10500, category: "Kanjivaram", rating: 4.9, image: "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?q=80&w=600&auto=format&fit=crop" },
+            { id: 3, name: "Midnight Blue Georgette", price: 1800, originalPrice: 2400, category: "Georgette", rating: 4.5, image: "https://images.unsplash.com/photo-1583391733958-e024b126d60a?q=80&w=600&auto=format&fit=crop" },
+            { id: 4, name: "Pink Mysore Silk", price: 3200, originalPrice: 4000, category: "Mysore Silk", rating: 4.6, image: "https://images.unsplash.com/photo-1629814423877-677967268846?q=80&w=600&auto=format&fit=crop" },
+            { id: 5, name: "Green Cotton Handloom", price: 1200, originalPrice: 1800, category: "Cotton", rating: 4.3, image: "https://images.unsplash.com/photo-1594631252845-29fc4cc8cde9?q=80&w=600&auto=format&fit=crop" },
+            { id: 6, name: "Black Sequin Party Wear", price: 2999, originalPrice: 4500, category: "Party Wear", rating: 4.7, image: "https://images.unsplash.com/photo-1585487000160-6ebcfceb0d03?q=80&w=600&auto=format&fit=crop" },
+            { id: 7, name: "Teal Paithani Silk", price: 6500, originalPrice: 8000, category: "Paithani", rating: 4.8, image: "https://images.unsplash.com/photo-1610189025114-1f6b2f4f1418?q=80&w=600&auto=format&fit=crop" },
+            { id: 8, name: "Yellow Chiffon Floral", price: 1500, originalPrice: 2200, category: "Chiffon", rating: 4.4, image: "https://images.unsplash.com/photo-1518049362265-d5b2a6467637?q=80&w=600&auto=format&fit=crop" },
+            { id: 9, name: "Bridal Heavy Embroidery", price: 12500, originalPrice: 18000, category: "Bridal", rating: 5.0, image: "https://images.unsplash.com/photo-1609357602129-28f6938d970b?q=80&w=600&auto=format&fit=crop" },
+            { id: 10, name: "White Kasavu Kerala", price: 1800, originalPrice: 2500, category: "Cotton", rating: 4.6, image: "https://images.unsplash.com/photo-1609127102567-9a914e8e506d?q=80&w=600&auto=format&fit=crop" },
+            { id: 11, name: "Lavender Organza", price: 2400, originalPrice: 3500, category: "Organza", rating: 4.5, image: "https://images.unsplash.com/photo-1618396568288-750d4f134551?q=80&w=600&auto=format&fit=crop" },
+            { id: 12, name: "Maroon Velvet Saree", price: 3800, originalPrice: 5000, category: "Party Wear", rating: 4.7, image: "https://images.unsplash.com/photo-1596473536124-4f811568c07e?q=80&w=600&auto=format&fit=crop" },
+            { id: 13, name: "Tussar Silk Beige", price: 4200, originalPrice: 5500, category: "Silk", rating: 4.4, image: "https://images.unsplash.com/photo-1589810635657-23294847e66d?q=80&w=600&auto=format&fit=crop" },
+            { id: 14, name: "Indigo Block Print", price: 1600, originalPrice: 2100, category: "Cotton", rating: 4.3, image: "https://images.unsplash.com/photo-1601662528567-526cd06f65e8?q=80&w=600&auto=format&fit=crop" },
+            { id: 15, name: "Silver Grey Satin", price: 2100, originalPrice: 3000, category: "Satin", rating: 4.6, image: "https://images.unsplash.com/photo-1574309322898-05b1c2b5346c?q=80&w=600&auto=format&fit=crop" },
+            { id: 16, name: "Orange Bandhani", price: 2800, originalPrice: 3800, category: "Traditional", rating: 4.7, image: "https://images.unsplash.com/photo-1599708153386-5d63f25c7b37?q=80&w=600&auto=format&fit=crop" },
+            { id: 17, name: "Peacock Blue Silk", price: 5600, originalPrice: 7200, category: "Silk", rating: 4.9, image: "https://images.unsplash.com/photo-1605908502724-9093a79a1b39?q=80&w=600&auto=format&fit=crop" },
+            { id: 18, name: "Linen Pastel Pink", price: 2300, originalPrice: 3200, category: "Linen", rating: 4.4, image: "https://images.unsplash.com/photo-1608643809633-85816c761c5e?q=80&w=600&auto=format&fit=crop" },
+            { id: 19, name: "Emerald Green Chanderi", price: 3400, originalPrice: 4500, category: "Chanderi", rating: 4.6, image: "https://images.unsplash.com/photo-1549419163-95244be71a39?q=80&w=600&auto=format&fit=crop" },
+            { id: 20, name: "Multi-color Patola", price: 7800, originalPrice: 11000, category: "Patola", rating: 4.8, image: "https://images.unsplash.com/photo-1601366922570-5b6256c703d1?q=80&w=600&auto=format&fit=crop" },
+        ];
+
+        const CATEGORIES = ["All", "Banarasi", "Silk", "Cotton", "Party Wear", "Bridal"];
+
+        // --- STATE MANAGEMENT ---
+        let state = {
+            activeTab: 'home',
+            cart: [],
+            wishlist: [],
+            searchQuery: '',
+            selectedCategory: 'All',
+            viewProduct: null,
+            showLoginModal: false,
+            pendingTab: null, // To redirect after login
+            user: {
+                name: "",
+                phone: "",
+                address: "",
+                photo: null
+            }
+        };
+
+        // --- LOCAL STORAGE ---
+        function loadState() {
+            const savedCart = localStorage.getItem('shreeSareeCart');
+            const savedUser = localStorage.getItem('shreeSareeUser');
+            const savedWishlist = localStorage.getItem('shreeSareeWishlist');
+
+            if (savedCart) state.cart = JSON.parse(savedCart);
+            if (savedUser) state.user = JSON.parse(savedUser);
+            if (savedWishlist) state.wishlist = JSON.parse(savedWishlist);
+            renderApp();
+        }
+
+        function saveState() {
+            localStorage.setItem('shreeSareeCart', JSON.stringify(state.cart));
+            localStorage.setItem('shreeSareeUser', JSON.stringify(state.user));
+            localStorage.setItem('shreeSareeWishlist', JSON.stringify(state.wishlist));
+            renderApp();
+        }
+
+        // --- LOGIN LOGIC ---
+        function isLoggedIn() {
+            return state.user.name && state.user.phone;
+        }
+
+        function checkLogin(targetTab) {
+            if (isLoggedIn()) {
+                setActiveTab(targetTab);
+            } else {
+                state.pendingTab = targetTab;
+                state.showLoginModal = true;
+                renderApp();
+            }
+        }
+
+        function processLogin() {
+            const nameInput = document.getElementById('loginName').value.trim();
+            const phoneInput = document.getElementById('loginPhone').value.trim();
+            const errorDiv = document.getElementById('loginError');
+
+            if (!nameInput || !phoneInput) {
+                errorDiv.innerText = "Please enter both Name and Mobile Number";
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+
+            if (phoneInput.length < 10) {
+                 errorDiv.innerText = "Please enter a valid Mobile Number";
+                 errorDiv.classList.remove('hidden');
+                 return;
+            }
+
+            // Save Login
+            state.user.name = nameInput;
+            state.user.phone = phoneInput;
+            state.showLoginModal = false;
+            
+            // Redirect to pending tab or default to profile to finish details
+            const nextTab = state.pendingTab || 'profile';
+            state.pendingTab = null;
+            
+            saveState(); // Persist to local storage
+            setActiveTab(nextTab);
+        }
+
+        // --- ACTIONS ---
+        function setActiveTab(tab) {
+            state.activeTab = tab;
+            state.viewProduct = null;
+            renderApp();
+        }
+
+        function setCategory(cat) {
+            state.selectedCategory = cat;
+            renderApp();
+        }
+
+        function addToCart(productId) {
+            const product = PRODUCTS.find(p => p.id === productId);
+            const existing = state.cart.find(item => item.id === productId);
+            if (existing) {
+                existing.qty += 1;
+            } else {
+                state.cart.push({ ...product, qty: 1 });
+            }
+            saveState();
+        }
+
+        function removeFromCart(id) {
+            state.cart = state.cart.filter(item => item.id !== id);
+            saveState();
+        }
+
+        function updateQty(id, delta) {
+            state.cart = state.cart.map(item => {
+                if (item.id === id) {
+                    const newQty = item.qty + delta;
+                    return newQty > 0 ? { ...item, qty: newQty } : item;
+                }
+                return item;
+            });
+            saveState();
+        }
+
+        function toggleWishlist(e, id) {
+            e.stopPropagation();
+            if (state.wishlist.includes(id)) {
+                state.wishlist = state.wishlist.filter(wId => wId !== id);
+            } else {
+                state.wishlist.push(id);
+            }
+            saveState();
+        }
+
+        function handleSearch(e) {
+            state.searchQuery = e.target.value;
+            renderApp();
+        }
+
+        function openProduct(product) {
+            state.viewProduct = product;
+            renderApp();
+        }
+
+        function closeProduct() {
+            state.viewProduct = null;
+            renderApp();
+        }
+
+        function handlePhotoUpload(input) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    state.user.photo = reader.result;
+                    saveState();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function updateUserField(field, value) {
+            state.user[field] = value;
+            saveState(); 
+        }
+
+        function checkoutWhatsApp() {
+            if (state.cart.length === 0) return;
+
+            const totalAmount = state.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            let message = `*Namaste Shree Saree!* 🙏\nI would like to place an order.\n\n*Customer Details:*\nName: ${state.user.name}\nPhone: ${state.user.phone}\nAddress: ${state.user.address}\n\n*Order Summary:*`;
+
+            state.cart.forEach((item, index) => {
+                message += `\n${index + 1}. ${item.name} x ${item.qty} - ₹${item.price * item.qty}`;
+            });
+
+            message += `\n\n*Total Amount: ₹${totalAmount}*`;
+            message += `\n\nPlease confirm my order.`;
+
+            const encodedMsg = encodeURIComponent(message);
+            const whatsappUrl = `https://wa.me/919916519128?text=${encodedMsg}`;
+            
+            window.open(whatsappUrl, '_blank');
+        }
+
+        // --- RENDER FUNCTIONS ---
+        
+        function renderHeader() {
+            // Profile Icon Click triggers checkLogin('profile')
+            const userPhoto = state.user.photo 
+                ? `<img src="${state.user.photo}" class="w-9 h-9 rounded-full object-cover border-2 border-rose-100">`
+                : `<div class="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-500"><i class="ph-bold ph-user text-xl"></i></div>`;
+
+            const backButton = (state.activeTab !== 'home' && state.activeTab !== 'search')
+                ? `<button onclick="setActiveTab('home')" class="p-1"><i class="ph-bold ph-arrow-left text-2xl text-gray-700"></i></button>`
+                : `<div class="w-8 h-8 rounded-full bg-rose-600 flex items-center justify-center text-white font-bold text-xs">SS</div>`;
+
+            return `
+                <div class="sticky top-0 z-40 bg-white shadow-sm px-4 py-3 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        ${backButton}
+                        <h1 class="text-xl font-bold text-gray-900 tracking-tight">Shree <span class="text-rose-600">Saree</span></h1>
+                    </div>
+                    <div onclick="checkLogin('profile')" class="cursor-pointer">
+                        ${userPhoto}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderProductCard(product) {
+            const isWishlisted = state.wishlist.includes(product.id);
+            const heartClass = isWishlisted ? 'ph-fill ph-heart text-rose-500' : 'ph-bold ph-heart text-gray-500';
+            const discount = Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100);
+
+            return `
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col h-full animate-fade-in">
+                    <div class="relative aspect-[3/4] overflow-hidden group cursor-pointer" onclick="openProductById(${product.id})">
+                        <img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover">
+                        <button onclick="toggleWishlist(event, ${product.id})" class="absolute top-2 right-2 p-2 bg-white/80 backdrop-blur-sm rounded-full shadow-sm z-10">
+                            <i class="${heartClass} text-lg"></i>
+                        </button>
+                        ${discount > 0 ? `<div class="absolute top-2 left-2 bg-rose-600 text-white text-[10px] font-bold px-2 py-1 rounded">${discount}% OFF</div>` : ''}
+                    </div>
+                    <div class="p-3 flex-1 flex flex-col">
+                        <div onclick="openProductById(${product.id})" class="flex-1 cursor-pointer">
+                            <div class="text-xs text-rose-600 font-medium mb-1">${product.category}</div>
+                            <h3 class="text-sm font-semibold text-gray-800 leading-snug line-clamp-2 mb-2">${product.name}</h3>
+                            <div class="flex items-center gap-1 mb-2">
+                                <i class="ph-fill ph-star text-amber-400 text-xs"></i>
+                                <span class="text-xs text-gray-500 font-medium">${product.rating}</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between mt-auto">
+                            <div>
+                                <span class="text-base font-bold text-gray-900">₹${product.price}</span>
+                                <span class="text-xs text-gray-400 line-through ml-2">₹${product.originalPrice}</span>
+                            </div>
+                            <button onclick="addToCart(${product.id})" class="bg-gray-900 text-white p-2 rounded-lg active:scale-95 transition-transform flex items-center justify-center">
+                                <i class="ph-bold ph-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderHome() {
+            const filtered = PRODUCTS.filter(p => state.selectedCategory === 'All' || p.category === state.selectedCategory);
+            
+            const categoriesHtml = CATEGORIES.map(cat => `
+                <button onclick="setCategory('${cat}')" class="whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-colors ${state.selectedCategory === cat ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600'}">
+                    ${cat}
+                </button>
+            `).join('');
+
+            const productsHtml = filtered.map(p => renderProductCard(p)).join('');
+
+            return `
+                <div class="pb-24">
+                    <div class="px-4 py-4">
+                        <div class="bg-gradient-to-r from-rose-500 to-purple-600 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
+                            <div class="relative z-10">
+                                <p class="text-rose-100 font-medium mb-1">New Collection</p>
+                                <h2 class="text-3xl font-bold mb-4">Wedding Season Sale</h2>
+                                <button onclick="setCategory('Bridal')" class="bg-white text-rose-600 px-4 py-2 rounded-lg font-bold text-sm shadow-sm">Shop Now</button>
+                            </div>
+                            <div class="absolute right-0 top-0 h-full w-1/2 opacity-20 bg-[url('https://images.unsplash.com/photo-1583391733958-e024b126d60a?q=80&w=600')] bg-cover bg-center"></div>
+                        </div>
+                    </div>
+                    <div class="px-4 mb-6">
+                        <h3 class="font-bold text-gray-900 mb-3 text-lg">Categories</h3>
+                        <div class="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                            ${categoriesHtml}
+                        </div>
+                    </div>
+                    <div class="px-4">
+                        <h3 class="font-bold text-gray-900 mb-3 text-lg">Popular Sarees</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            ${productsHtml}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderSearch() {
+            const filtered = PRODUCTS.filter(p => {
+                return p.name.toLowerCase().includes(state.searchQuery.toLowerCase()) || 
+                       p.category.toLowerCase().includes(state.searchQuery.toLowerCase());
+            });
+
+            const content = filtered.length === 0 
+                ? `<div class="text-center text-gray-500 mt-20">
+                    <i class="ph ph-magnifying-glass text-5xl mb-4 opacity-20"></i>
+                    <p>No sarees found matching "${state.searchQuery}"</p>
+                   </div>`
+                : `<div class="grid grid-cols-2 gap-4">${filtered.map(p => renderProductCard(p)).join('')}</div>`;
+
+            return `
+                <div class="p-4 pb-24 h-full">
+                    <div class="relative mb-6">
+                        <i class="ph ph-magnifying-glass absolute left-3 top-3.5 text-gray-400 text-lg"></i>
+                        <input type="text" placeholder="Search for Banarasi, Silk..." 
+                            class="w-full pl-10 pr-4 py-3 bg-gray-100 rounded-xl outline-none focus:ring-2 focus:ring-rose-500 transition-all"
+                            value="${state.searchQuery}"
+                            oninput="handleSearch(event)" autofocus>
+                    </div>
+                    ${content}
+                </div>
+            `;
+        }
+
+        function renderCart() {
+            // NOTE: This view is only reachable if isLoggedIn() is true
+            
+            if (state.cart.length === 0) {
+                return `
+                    <div class="p-4 pb-24 h-full flex flex-col items-center justify-center text-center">
+                        <div class="w-20 h-20 bg-rose-50 rounded-full flex items-center justify-center mb-4">
+                            <i class="ph-fill ph-tote text-3xl text-rose-400"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-900">Your bag is empty</h3>
+                        <p class="text-gray-500 mb-6 max-w-xs">Looks like you haven't added any beautiful sarees yet.</p>
+                        <button onclick="setActiveTab('home')" class="px-6 py-3 bg-gray-900 text-white rounded-xl font-bold shadow-lg">Start Shopping</button>
+                    </div>
+                `;
+            }
+
+            const cartItemsHtml = state.cart.map(item => `
+                <div class="flex gap-4 bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
+                    <img src="${item.image}" class="w-20 h-24 object-cover rounded-lg">
+                    <div class="flex-1 flex flex-col justify-between">
+                        <div>
+                            <h4 class="font-semibold text-gray-900 line-clamp-1">${item.name}</h4>
+                            <span class="text-sm text-gray-500">${item.category}</span>
+                        </div>
+                        <div class="flex justify-between items-end">
+                            <span class="font-bold text-rose-600">₹${item.price * item.qty}</span>
+                            <div class="flex items-center gap-3 bg-gray-50 rounded-lg px-2 py-1">
+                                <button onclick="updateQty(${item.id}, -1)" class="p-1 hover:bg-white rounded shadow-sm flex"><i class="ph-bold ph-minus text-xs"></i></button>
+                                <span class="text-sm font-semibold w-3 text-center">${item.qty}</span>
+                                <button onclick="updateQty(${item.id}, 1)" class="p-1 hover:bg-white rounded shadow-sm flex"><i class="ph-bold ph-plus text-xs"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="removeFromCart(${item.id})" class="text-gray-300 hover:text-red-500 self-start p-1"><i class="ph-bold ph-trash text-lg"></i></button>
+                </div>
+            `).join('');
+
+            const total = state.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            // Since we force login, user name and phone should be there. Address might be empty.
+            const hasAddress = state.user.address && state.user.address.trim().length > 0;
+
+            return `
+                <div class="p-4 pb-24 h-full flex flex-col">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Shopping Bag</h2>
+                    <div class="flex-1 overflow-y-auto space-y-4 pr-1 scrollbar-hide">
+                        ${cartItemsHtml}
+                    </div>
+                    <div class="mt-4 bg-white rounded-2xl p-4 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] border border-gray-100">
+                        <div class="flex justify-between mb-2 text-gray-500"><span>Subtotal</span><span>₹${total}</span></div>
+                        <div class="flex justify-between mb-4 text-gray-500"><span>Shipping</span><span class="text-green-600">Free</span></div>
+                        <div class="flex justify-between mb-6 text-xl font-bold text-gray-900"><span>Total</span><span>₹${total}</span></div>
+                        
+                        ${!hasAddress ? `<div class="mb-4 text-xs text-amber-600 bg-amber-50 p-2 rounded text-center">⚠️ Please add your delivery address in Profile tab before checkout</div>` : ''}
+
+                        <button onclick="checkoutWhatsApp()" ${!hasAddress ? 'disabled' : ''} 
+                            class="w-full py-4 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg transition-colors ${!hasAddress ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-[#25D366] text-white hover:bg-[#128C7E]'}">
+                            <span>Checkout via WhatsApp</span>
+                            <i class="ph-bold ph-whatsapp-logo text-lg"></i>
+                        </button>
+                        <p class="text-xs text-center text-gray-400 mt-3">Order details will be sent to 9916519128</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderProfile() {
+            // NOTE: This view is only reachable if isLoggedIn() is true
+            
+            const photoSrc = state.user.photo || '';
+            const photoHtml = state.user.photo 
+                ? `<img src="${state.user.photo}" class="w-full h-full object-cover">`
+                : `<i class="ph ph-user text-4xl text-gray-400"></i>`;
+
+            return `
+                <div class="p-4 pb-24 overflow-y-auto h-full scrollbar-hide">
+                    <div class="flex flex-col items-center mb-8">
+                        <div class="relative group cursor-pointer">
+                            <div class="w-28 h-28 rounded-full overflow-hidden border-4 border-white shadow-lg bg-gray-100 flex items-center justify-center">
+                                ${photoHtml}
+                            </div>
+                            <label class="absolute bottom-0 right-0 bg-gray-900 text-white p-2 rounded-full cursor-pointer shadow-md hover:bg-rose-600 transition-colors flex items-center justify-center">
+                                <i class="ph-bold ph-camera text-base"></i>
+                                <input type="file" accept="image/*" class="hidden" onchange="handlePhotoUpload(this)">
+                            </label>
+                        </div>
+                        <h2 class="text-xl font-bold text-gray-900 mt-4">${state.user.name}</h2>
+                        <p class="text-gray-500 text-sm">${state.user.phone}</p>
+                    </div>
+
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
+                        <h3 class="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                            <i class="ph-bold ph-user text-rose-600"></i> Personal Details
+                        </h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-500 mb-1">Full Name</label>
+                                <input type="text" value="${state.user.name}" onchange="updateUserField('name', this.value)"
+                                    class="w-full p-3 bg-gray-50 rounded-lg text-sm focus:ring-1 focus:ring-rose-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-500 mb-1">Phone Number</label>
+                                <input type="tel" value="${state.user.phone}" onchange="updateUserField('phone', this.value)" placeholder="+91"
+                                    class="w-full p-3 bg-gray-50 rounded-lg text-sm focus:ring-1 focus:ring-rose-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-500 mb-1">Delivery Address</label>
+                                <textarea onchange="updateUserField('address', this.value)" rows="3" placeholder="Enter full address"
+                                    class="w-full p-3 bg-gray-50 rounded-lg text-sm focus:ring-1 focus:ring-rose-500 outline-none resize-none">${state.user.address}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-rose-50 border border-rose-100 rounded-xl p-4 text-center">
+                        <p class="text-sm text-rose-800 font-medium">Need Help?</p>
+                        <p class="text-xs text-rose-600 mt-1">Contact Shree Saree Support</p>
+                        <a href="tel:9916519128" class="inline-block mt-3 bg-white text-rose-600 px-4 py-2 rounded-lg text-xs font-bold shadow-sm">Call 9916519128</a>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderNavBar() {
+            const tabs = [
+                { id: 'home', icon: 'ph-house', label: 'Home' },
+                { id: 'search', icon: 'ph-magnifying-glass', label: 'Search' },
+                { id: 'cart', icon: 'ph-tote', label: 'Bag' },
+                { id: 'profile', icon: 'ph-user', label: 'Profile' }
+            ];
+
+            const cartCount = state.cart.reduce((sum, item) => sum + item.qty, 0);
+
+            const html = tabs.map(tab => {
+                const isActive = state.activeTab === tab.id;
+                const colorClass = isActive ? 'text-rose-600' : 'text-gray-400 hover:text-gray-600';
+                const weight = isActive ? 'ph-fill' : 'ph-bold';
+                
+                let badge = '';
+                if (tab.id === 'cart' && cartCount > 0) {
+                    badge = `<span class="absolute -top-1 -right-2 bg-rose-600 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center animate-bounce">${cartCount}</span>`;
+                }
+
+                // IMPORTANT: Logic to gate 'cart' and 'profile' access
+                let onclickAction = `setActiveTab('${tab.id}')`;
+                if (tab.id === 'cart' || tab.id === 'profile') {
+                    onclickAction = `checkLogin('${tab.id}')`;
+                }
+
+                return `
+                    <button onclick="${onclickAction}" class="flex-1 flex flex-col items-center justify-center py-2 transition-all ${colorClass}">
+                        <div class="relative">
+                            <i class="${weight} ${tab.icon} text-2xl"></i>
+                            ${badge}
+                        </div>
+                        <span class="text-[10px] font-medium mt-1">${tab.label}</span>
+                    </button>
+                `;
+            }).join('');
+
+            return `
+                <nav class="absolute bottom-0 w-full bg-white border-t border-gray-100 pb-safe shadow-[0_-10px_40px_rgba(0,0,0,0.05)] z-30">
+                    <div class="flex justify-around items-center h-16 px-2">
+                        ${html}
+                    </div>
+                </nav>
+            `;
+        }
+
+        function renderProductModal() {
+            if (!state.viewProduct) return '';
+            const p = state.viewProduct;
+            
+            return `
+                <div class="fixed inset-0 z-50 bg-white flex flex-col overflow-y-auto animate-slide-up w-full max-w-md mx-auto">
+                    <div class="relative h-[50vh] shrink-0">
+                        <img src="${p.image}" class="w-full h-full object-cover">
+                        <button onclick="closeProduct()" class="absolute top-4 left-4 p-2 bg-white/80 rounded-full shadow-lg">
+                            <i class="ph-bold ph-arrow-left text-xl"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="flex-1 p-6 -mt-6 bg-white rounded-t-3xl relative z-10 flex flex-col">
+                        <div class="w-12 h-1 bg-gray-200 rounded-full mx-auto mb-6 shrink-0"></div>
+                        
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <span class="text-rose-600 font-bold text-sm tracking-wide uppercase">${p.category}</span>
+                                <h2 class="text-2xl font-bold text-gray-900 mt-1">${p.name}</h2>
+                            </div>
+                            <div class="flex flex-col items-end">
+                                <span class="text-2xl font-bold text-gray-900">₹${p.price}</span>
+                                <span class="text-sm text-gray-400 line-through">₹${p.originalPrice}</span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2 mb-6">
+                            <div class="flex text-amber-400">
+                                <i class="ph-fill ph-star text-sm"></i>
+                                <i class="ph-fill ph-star text-sm"></i>
+                                <i class="ph-fill ph-star text-sm"></i>
+                                <i class="ph-fill ph-star text-sm"></i>
+                                <i class="ph-fill ph-star-half text-sm"></i>
+                            </div>
+                            <span class="text-sm text-gray-500">(120 Reviews)</span>
+                        </div>
+
+                        <p class="text-gray-600 leading-relaxed mb-6">
+                            This exquisite saree represents the finest craftsmanship. Perfect for weddings, festivals, and special occasions. Handpicked for the Shree Saree collection.
+                        </p>
+
+                        <div class="mt-auto pt-4 bg-white border-t border-gray-100 flex gap-4 sticky bottom-0">
+                            <button onclick="addToCart(${p.id}); closeProduct()" class="flex-1 py-3 border border-gray-900 text-gray-900 font-bold rounded-xl">Add to Cart</button>
+                            <!-- Buy Now checks login before moving to cart -->
+                            <button onclick="addToCart(${p.id}); closeProduct(); checkLogin('cart')" class="flex-1 py-3 bg-rose-600 text-white font-bold rounded-xl shadow-lg shadow-rose-200">Buy Now</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderLoginModal() {
+            if (!state.showLoginModal) return '';
+
+            return `
+                <div class="fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-backdrop w-full max-w-md mx-auto">
+                    <div class="bg-white rounded-2xl w-full p-6 shadow-2xl transform scale-100 animate-fade-in">
+                        <div class="text-center mb-6">
+                            <div class="w-12 h-12 bg-rose-50 rounded-full flex items-center justify-center text-rose-600 font-bold mx-auto mb-3 text-xl">
+                                SS
+                            </div>
+                            <h2 class="text-xl font-bold text-gray-900">Welcome to Shree Saree</h2>
+                            <p class="text-sm text-gray-500 mt-1">Please login to view your bag and profile</p>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-600 mb-1 ml-1">YOUR NAME</label>
+                                <div class="relative">
+                                    <i class="ph-bold ph-user absolute left-3 top-3.5 text-gray-400"></i>
+                                    <input type="text" id="loginName" placeholder="Enter your full name" 
+                                        class="w-full pl-10 pr-4 py-3 bg-gray-50 rounded-xl outline-none focus:ring-2 focus:ring-rose-500 transition-all border border-gray-200">
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-xs font-bold text-gray-600 mb-1 ml-1">MOBILE NUMBER</label>
+                                <div class="relative">
+                                    <i class="ph-bold ph-phone absolute left-3 top-3.5 text-gray-400"></i>
+                                    <input type="tel" id="loginPhone" placeholder="Enter 10-digit mobile number" 
+                                        class="w-full pl-10 pr-4 py-3 bg-gray-50 rounded-xl outline-none focus:ring-2 focus:ring-rose-500 transition-all border border-gray-200">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="loginError" class="hidden mt-3 text-xs text-rose-600 bg-rose-50 p-2 rounded text-center font-medium"></div>
+
+                        <button onclick="processLogin()" class="w-full mt-6 bg-rose-600 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-rose-200 hover:bg-rose-700 active:scale-95 transition-all">
+                            Continue Securely
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderApp() {
+            const app = document.getElementById('app');
+            let content = '';
+
+            // Header
+            content += renderHeader();
+
+            // Main Content Area
+            content += `<main class="flex-1 overflow-hidden relative">`;
+            if (state.activeTab === 'home') content += renderHome();
+            else if (state.activeTab === 'search') content += renderSearch();
+            else if (state.activeTab === 'cart') content += renderCart();
+            else if (state.activeTab === 'profile') content += renderProfile();
+            content += `</main>`;
+
+            // Nav Bar
+            content += renderNavBar();
+
+            // Modals
+            content += renderProductModal();
+            content += renderLoginModal();
+
+            app.innerHTML = content;
+        }
+
+        // --- HELPER TO OPEN PRODUCT FROM ID ---
+        function openProductById(id) {
+            const p = PRODUCTS.find(x => x.id === id);
+            if(p) openProduct(p);
+        }
+
+        // --- INITIALIZE ---
+        loadState();
+
+    </script>
+</body>
+</html>
