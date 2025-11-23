@@ -156,18 +156,16 @@
 
         // --- LOGIC FUNCTIONS ---
         function loadState() {
-            // UPDATED: Storage keys to Kandamas
-            if(localStorage.getItem('kandamasSareeCart')) state.cart = JSON.parse(localStorage.getItem('kandamasSareeCart'));
-            if(localStorage.getItem('kandamasSareeUser')) state.user = JSON.parse(localStorage.getItem('kandamasSareeUser'));
-            if(localStorage.getItem('kandamasSareeWishlist')) state.wishlist = JSON.parse(localStorage.getItem('kandamasSareeWishlist'));
+            if(localStorage.getItem('shreeSareeCart')) state.cart = JSON.parse(localStorage.getItem('shreeSareeCart'));
+            if(localStorage.getItem('shreeSareeUser')) state.user = JSON.parse(localStorage.getItem('shreeSareeUser'));
+            if(localStorage.getItem('shreeSareeWishlist')) state.wishlist = JSON.parse(localStorage.getItem('shreeSareeWishlist'));
             renderApp();
         }
 
         function saveState() {
-            // UPDATED: Storage keys to Kandamas
-            localStorage.setItem('kandamasSareeCart', JSON.stringify(state.cart));
-            localStorage.setItem('kandamasSareeUser', JSON.stringify(state.user));
-            localStorage.setItem('kandamasSareeWishlist', JSON.stringify(state.wishlist));
+            localStorage.setItem('shreeSareeCart', JSON.stringify(state.cart));
+            localStorage.setItem('shreeSareeUser', JSON.stringify(state.user));
+            localStorage.setItem('shreeSareeWishlist', JSON.stringify(state.wishlist));
             renderApp();
         }
 
@@ -200,8 +198,7 @@
         }
 
         function logout() {
-            // UPDATED: Logout Text
-            if(confirm("Log out of Kandamas Saree?")) {
+            if(confirm("Log out of Shree Saree?")) {
                 state.user = { name: "", phone: "", address: "", photo: null };
                 saveState();
                 setActiveTab('home');
@@ -247,8 +244,7 @@
         function checkoutWhatsApp() {
             if(state.cart.length === 0) return;
             const total = state.cart.reduce((s, i) => s + (i.price * i.qty), 0);
-            // UPDATED: Whatsapp Message
-            let msg = `*Namaste Kandamas Saree!* 🙏\nOrder Request:\n\n*Customer:*\n${state.user.name}\n${state.user.phone}\n${state.user.address}\n\n*Items:*`;
+            let msg = `*Namaste Shree Saree!* 🙏\nOrder Request:\n\n*Customer:*\n${state.user.name}\n${state.user.phone}\n${state.user.address}\n\n*Items:*`;
             state.cart.forEach((i, idx) => msg += `\n${idx+1}. ${i.name} x ${i.qty} - ₹${i.price*i.qty}`);
             msg += `\n\n*Total: ₹${total}*`;
             window.open(`https://wa.me/919916519128?text=${encodeURIComponent(msg)}`, '_blank');
@@ -271,16 +267,14 @@
             
             const back = (state.activeTab !== 'home' && state.activeTab !== 'search')
                 ? `<button onclick="setActiveTab('home')" class="p-1"><i class="ph-bold ph-arrow-left text-2xl text-gray-700"></i></button>`
-                // UPDATED: Initials SS -> KS
-                : `<div class="w-8 h-8 rounded-full bg-rose-600 flex items-center justify-center text-white font-bold text-xs shadow-md">KS</div>`;
+                : `<div class="w-8 h-8 rounded-full bg-rose-600 flex items-center justify-center text-white font-bold text-xs shadow-md">SS</div>`;
 
             // Note: Header is shrink-0 to prevent compression
-            // UPDATED: Title
             return `
                 <div class="shrink-0 bg-white px-4 pt-safe pb-3 flex items-center justify-between border-b border-gray-50 relative z-20">
                     <div class="flex items-center gap-3">
                         ${back}
-                        <h1 class="text-xl font-bold text-gray-900 tracking-tight">Kandamas <span class="text-rose-600">Saree</span></h1>
+                        <h1 class="text-xl font-bold text-gray-900 tracking-tight">Shree <span class="text-rose-600">Saree</span></h1>
                     </div>
                     <div onclick="checkLogin('profile')" class="cursor-pointer active:scale-95 transition-transform">${photo}</div>
                 </div>
@@ -403,7 +397,7 @@
                         : `<div class="flex flex-col items-center justify-center mt-20 text-gray-400 opacity-60">
                              <i class="ph ph-magnifying-glass text-6xl mb-4 text-gray-200"></i>
                              <p class="font-medium">No matches found</p>
-                            </div>`
+                           </div>`
                     }
                 </div>
             `;
@@ -470,7 +464,6 @@
 
         function renderProfile() {
             const photo = state.user.photo ? `<img src="${state.user.photo}" class="w-full h-full object-cover">` : `<i class="ph-fill ph-user text-4xl text-gray-300"></i>`;
-            // UPDATED: Logout Text
             return `
                 <div class="h-full overflow-y-auto scrollbar-hide bg-gray-50 pb-safe animate-fade-in">
                     <!-- Header Profile -->
@@ -530,7 +523,7 @@
                             </button>
                         </div>
                         
-                        <p class="text-center text-[10px] text-gray-400 mt-6">Version 2.0.2 • Made with ❤️ in India</p>
+                        <p class="text-center text-[10px] text-gray-400 mt-6">Version 2.0.2 • Made By Kandamas</p>
                     </div>
                 </div>
             `;
@@ -617,14 +610,13 @@
 
         function renderLoginModal() {
             if(!state.showLoginModal) return '';
-            // UPDATED: Initials to KS
             return `
                 <div class="absolute inset-0 z-[60] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-backdrop">
                     <div class="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl animate-fade-in relative">
                         <button onclick="state.showLoginModal=false; renderApp()" class="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600"><i class="ph-bold ph-x text-xl"></i></button>
                         
                         <div class="text-center mb-8 pt-4">
-                            <div class="w-16 h-16 bg-rose-50 rounded-full flex items-center justify-center text-rose-600 font-bold mx-auto mb-4 text-2xl shadow-sm">KS</div>
+                            <div class="w-16 h-16 bg-rose-50 rounded-full flex items-center justify-center text-rose-600 font-bold mx-auto mb-4 text-2xl shadow-sm">SS</div>
                             <h2 class="text-2xl font-bold text-gray-900">Welcome Back</h2>
                             <p class="text-sm text-gray-500 mt-2">Please login to access your bag & profile</p>
                         </div>
