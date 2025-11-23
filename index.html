@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Shree Saree App</title>
+    <title>Kandamas Saree App</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -253,7 +253,7 @@
         function checkoutWhatsApp() {
             if(state.cart.length === 0) return;
             const total = state.cart.reduce((s, i) => s + (i.price * i.qty), 0);
-            let msg = `*Namaste Shree Saree!* 🙏\nOrder Request:\n\n*Customer:*\n${state.user.name}\n${state.user.phone}\n${state.user.address}\n\n*Items:*`;
+            let msg = `*Namaste Kandamas Saree!* 🙏\nOrder Request:\n\n*Customer:*\n${state.user.name}\n${state.user.phone}\n${state.user.address}\n\n*Items:*`;
             state.cart.forEach((i, idx) => msg += `\n${idx+1}. ${i.name} x ${i.qty} - ₹${i.price*i.qty}`);
             msg += `\n\n*Total: ₹${total}*`;
             window.open(`https://wa.me/919916519128?text=${encodeURIComponent(msg)}`, '_blank');
@@ -532,7 +532,7 @@
                             </button>
                         </div>
                         
-                        <p class="text-center text-[10px] text-gray-400 mt-6">Version 2.0.3 • Made with ❤️ in India</p>
+                        <p class="text-center text-[10px] text-gray-400 mt-6">Version 2.0.3 • Made By Kandamas</p>
                     </div>
                 </div>
             `;
@@ -673,3 +673,4 @@
     </script>
 </body>
 </html>
+
