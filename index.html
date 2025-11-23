@@ -16,72 +16,86 @@
 
     <style>
         :root {
-            /* Fallback */
             --app-height: 100vh;
+            --header-height: 60px;
+            --nav-height: 70px;
         }
 
-        html, body {
-            padding: 0;
-            margin: 0;
-            overflow: hidden; /* Prevent elastic scrolling on body */
-            overscroll-behavior: none; /* Disables pull-to-refresh on mobile */
-            font-family: 'Outfit', sans-serif;
-            background-color: #f3f4f6;
-            -webkit-tap-highlight-color: transparent;
+        html {
+            height: -webkit-fill-available;
         }
 
         body {
-            /* Use the calculated height to fix address bar issues */
+            font-family: 'Outfit', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f3f4f6;
+            -webkit-tap-highlight-color: transparent;
+            /* CRITICAL: Fix for mobile browsers */
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
             height: var(--app-height);
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            width: 100vw;
+            overflow: hidden; /* Prevent body scroll, handle inside #app */
+            position: fixed; /* Lock body in place */
         }
 
         /* The Main App Container */
         #app {
             width: 100%;
             height: 100%;
-            background-color: white;
-            position: relative;
+            position: absolute;
+            top: 0;
+            left: 0;
             display: flex;
             flex-direction: column;
+            background-color: white;
             overflow: hidden;
         }
 
-        /* Desktop View: Phone Simulation */
-        @media (min-width: 768px) {
-            #app {
-                height: 95vh;
-                max-height: 850px;
-                max-width: 420px;
-                border-radius: 2rem;
-                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-                border: 1px solid #e5e7eb;
-            }
+        /* Scrollable Content Area */
+        #main-content {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch; /* Smooth scroll on iOS */
+            padding-bottom: 120px; /* EXTRA SPACE FOR BOTTOM NAV */
+            padding-top: 10px;
+            overscroll-behavior-y: contain;
         }
 
-        /* Utility for hiding scrollbars but allowing scroll */
+        /* Hide Scrollbar but allow scroll */
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* Animations */
-        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        /* Desktop View Simulation */
+        @media (min-width: 768px) {
+            body {
+                position: relative;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                background-color: #e5e7eb;
+            }
+            #app {
+                position: relative;
+                width: 400px;
+                height: 90vh;
+                max-height: 850px;
+                border-radius: 30px;
+                box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+                border: 8px solid #111827;
+            }
+        }
+
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         .animate-slide-up { animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
-        .animate-backdrop { animation: backdropFade 0.2s ease-out forwards; }
-        @keyframes backdropFade { from { opacity: 0; } to { opacity: 1; } }
-
-        /* SAFE AREA PADDING */
+        /* Safe Areas */
         .pt-safe { padding-top: max(12px, env(safe-area-inset-top)); }
-        .pb-safe { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
-        
-        /* Specific padding for bottom navigation to handle iPhone home bar / Android gestures */
-        .pb-safe-nav { padding-bottom: max(16px, env(safe-area-inset-bottom)); }
+        .pb-safe { padding-bottom: max(20px, env(safe-area-inset-bottom)); }
     </style>
     
     <script>
@@ -89,9 +103,7 @@
             theme: {
                 extend: {
                     colors: {
-                        rose: {
-                            50: '#fff1f2', 100: '#ffe4e6', 500: '#f43f5e', 600: '#e11d48', 800: '#9f1239',
-                        }
+                        rose: { 50: '#fff1f2', 100: '#ffe4e6', 500: '#f43f5e', 600: '#e11d48', 800: '#9f1239' }
                     }
                 }
             }
@@ -100,20 +112,18 @@
 </head>
 <body>
 
-    <!-- App Container -->
     <div id="app">
-        <!-- Content injected by JS -->
+        <!-- App Content -->
     </div>
 
     <script>
-        // --- 1. MOBILE HEIGHT FIX ---
-        // This calculates the real viewport height excluding browser UI
-        const setAppHeight = () => {
+        // --- MOBILE VIEWPORT FIX ---
+        function setAppHeight() {
             const doc = document.documentElement;
             doc.style.setProperty('--app-height', `${window.innerHeight}px`);
-        };
+        }
         window.addEventListener('resize', setAppHeight);
-        setAppHeight(); // Initial call
+        setAppHeight();
 
         // --- DATA ---
         const PRODUCTS = [
@@ -154,7 +164,7 @@
             user: { name: "", phone: "", address: "", photo: null }
         };
 
-        // --- LOGIC FUNCTIONS ---
+        // --- APP LOGIC ---
         function loadState() {
             if(localStorage.getItem('shreeSareeCart')) state.cart = JSON.parse(localStorage.getItem('shreeSareeCart'));
             if(localStorage.getItem('shreeSareeUser')) state.user = JSON.parse(localStorage.getItem('shreeSareeUser'));
@@ -212,7 +222,6 @@
             const exist = state.cart.find(x => x.id === id);
             if(exist) exist.qty++; else state.cart.push({...p, qty:1});
             saveState();
-            // Show toast feedback
             showToast(`Added ${p.name} to bag`);
         }
         function removeFromCart(id) { state.cart = state.cart.filter(x => x.id !== id); saveState(); }
@@ -252,13 +261,13 @@
 
         function showToast(msg) {
             const toast = document.createElement('div');
-            toast.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black/80 text-white px-6 py-3 rounded-full text-sm font-medium z-[70] animate-fade-in';
+            toast.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black/80 text-white px-6 py-3 rounded-full text-sm font-medium z-[70] animate-fade-in shadow-xl';
             toast.innerText = msg;
             document.getElementById('app').appendChild(toast);
             setTimeout(() => toast.remove(), 2000);
         }
 
-        // --- UI RENDERERS ---
+        // --- RENDERERS ---
 
         function renderHeader() {
             const photo = state.user.photo 
@@ -269,9 +278,9 @@
                 ? `<button onclick="setActiveTab('home')" class="p-1"><i class="ph-bold ph-arrow-left text-2xl text-gray-700"></i></button>`
                 : `<div class="w-8 h-8 rounded-full bg-rose-600 flex items-center justify-center text-white font-bold text-xs shadow-md">SS</div>`;
 
-            // Note: Header is shrink-0 to prevent compression
+            // STICKY HEADER
             return `
-                <div class="shrink-0 bg-white px-4 pt-safe pb-3 flex items-center justify-between border-b border-gray-50 relative z-20">
+                <div class="sticky top-0 z-40 bg-white/95 backdrop-blur-md px-4 pt-safe pb-3 flex items-center justify-between border-b border-gray-100 shadow-sm shrink-0">
                     <div class="flex items-center gap-3">
                         ${back}
                         <h1 class="text-xl font-bold text-gray-900 tracking-tight">Shree <span class="text-rose-600">Saree</span></h1>
@@ -290,10 +299,10 @@
             ];
             const count = state.cart.reduce((s, i) => s + i.qty, 0);
 
-            // Important: Nav is part of flex layout (shrink-0), not absolute
+            // FIXED BOTTOM NAVIGATION
             return `
-                <nav class="shrink-0 bg-white border-t border-gray-100 pb-safe-nav pt-1 shadow-[0_-5px_20px_rgba(0,0,0,0.03)] z-30">
-                    <div class="flex justify-around items-center h-14">
+                <nav class="absolute bottom-0 left-0 w-full bg-white border-t border-gray-100 pb-safe pt-2 shadow-[0_-5px_20px_rgba(0,0,0,0.05)] z-30">
+                    <div class="flex justify-around items-center h-[60px]">
                         ${tabs.map(t => {
                             const active = state.activeTab === t.id;
                             const color = active ? 'text-rose-600' : 'text-gray-400';
@@ -343,9 +352,9 @@
         function renderHome() {
             const list = PRODUCTS.filter(p => state.selectedCategory === 'All' || p.category === state.selectedCategory);
             return `
-                <div class="pb-6 animate-fade-in">
+                <div class="animate-fade-in">
                     <!-- Hero Banner -->
-                    <div class="px-4 py-4">
+                    <div class="px-4 py-2">
                         <div class="bg-gradient-to-r from-rose-500 to-purple-600 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden h-40 flex flex-col justify-center">
                             <div class="relative z-10 max-w-[60%]">
                                 <p class="text-rose-100 font-medium text-xs mb-1 bg-white/20 inline-block px-2 py-0.5 rounded-full backdrop-blur-md">New Collection</p>
@@ -357,7 +366,7 @@
                     </div>
                     
                     <!-- Categories -->
-                    <div class="mb-6">
+                    <div class="mb-6 mt-4">
                         <div class="px-4 mb-3 flex items-center justify-between">
                             <h3 class="font-bold text-gray-900 text-lg">Categories</h3>
                         </div>
@@ -388,9 +397,9 @@
             const list = PRODUCTS.filter(p => p.name.toLowerCase().includes(state.searchQuery.toLowerCase()) || p.category.toLowerCase().includes(state.searchQuery.toLowerCase()));
             return `
                 <div class="p-4 h-full animate-fade-in">
-                    <div class="relative mb-6 sticky top-0 bg-white z-10 pb-2">
+                    <div class="relative mb-6 sticky top-0 z-10">
                         <i class="ph ph-magnifying-glass absolute left-4 top-4 text-gray-400 text-lg"></i>
-                        <input type="text" placeholder="Search for sarees, silk, cotton..." class="w-full pl-11 pr-4 py-3.5 bg-gray-50 rounded-xl border-none outline-none focus:ring-2 focus:ring-rose-500/20 text-sm font-medium transition-all" value="${state.searchQuery}" oninput="handleSearch(event)" autofocus>
+                        <input type="text" placeholder="Search for sarees, silk, cotton..." class="w-full pl-11 pr-4 py-3.5 bg-gray-50 rounded-xl border-none outline-none focus:ring-2 focus:ring-rose-500/20 text-sm font-medium transition-all shadow-sm" value="${state.searchQuery}" oninput="handleSearch(event)" autofocus>
                     </div>
                     ${list.length 
                         ? `<div class="grid grid-cols-2 gap-4 pb-4">${list.map(p => renderProduct(p)).join('')}</div>` 
@@ -421,7 +430,7 @@
                         <h2 class="text-2xl font-bold">Shopping Bag <span class="text-sm font-normal text-gray-500 ml-2">(${state.cart.length} items)</span></h2>
                     </div>
                     
-                    <div class="flex-1 overflow-y-auto p-4 space-y-3 pb-4">
+                    <div class="p-4 space-y-3">
                         ${state.cart.map(i => `
                             <div class="flex gap-3 bg-white p-3 rounded-xl border border-gray-100 shadow-sm relative overflow-hidden">
                                 <img src="${i.image}" class="w-20 h-24 object-cover rounded-lg bg-gray-100 shrink-0">
@@ -444,7 +453,7 @@
                         `).join('')}
                     </div>
 
-                    <div class="bg-white rounded-t-2xl p-5 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] border-t border-gray-100 z-10 shrink-0">
+                    <div class="bg-white rounded-t-2xl p-5 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] border-t border-gray-100 mt-4">
                         <div class="space-y-2 mb-4">
                             <div class="flex justify-between text-sm text-gray-500"><span>Subtotal</span><span>₹${total}</span></div>
                             <div class="flex justify-between text-sm text-gray-500"><span>Delivery Charges</span><span class="text-green-600 font-medium">Free</span></div>
@@ -465,7 +474,7 @@
         function renderProfile() {
             const photo = state.user.photo ? `<img src="${state.user.photo}" class="w-full h-full object-cover">` : `<i class="ph-fill ph-user text-4xl text-gray-300"></i>`;
             return `
-                <div class="h-full overflow-y-auto scrollbar-hide bg-gray-50 pb-safe animate-fade-in">
+                <div class="h-full bg-gray-50 animate-fade-in">
                     <!-- Header Profile -->
                     <div class="bg-white pb-8 pt-6 px-4 rounded-b-[2rem] shadow-sm mb-4">
                         <div class="flex flex-col items-center">
@@ -523,7 +532,7 @@
                             </button>
                         </div>
                         
-                        <p class="text-center text-[10px] text-gray-400 mt-6">Version 2.0.2 • Made with ❤️ in India</p>
+                        <p class="text-center text-[10px] text-gray-400 mt-6">Version 2.0.3 • Made with ❤️ in India</p>
                     </div>
                 </div>
             `;
@@ -646,17 +655,14 @@
 
         function renderApp() {
             const app = document.getElementById('app');
-            // Flexbox Structure: Header -> Main (scroll) -> Nav
             app.innerHTML = `
                 ${renderHeader()}
-                <main class="flex-1 overflow-hidden relative w-full bg-white flex flex-col">
-                    <div class="flex-1 overflow-y-auto scrollbar-hide pb-4 overscroll-contain">
-                        ${state.activeTab === 'home' ? renderHome() : 
-                          state.activeTab === 'search' ? renderSearch() : 
-                          state.activeTab === 'cart' ? renderCart() : 
-                          renderProfile()}
-                    </div>
-                </main>
+                <div id="main-content">
+                    ${state.activeTab === 'home' ? renderHome() : 
+                      state.activeTab === 'search' ? renderSearch() : 
+                      state.activeTab === 'cart' ? renderCart() : 
+                      renderProfile()}
+                </div>
                 ${renderNavBar()}
                 ${renderProductModal()}
                 ${renderLoginModal()}
